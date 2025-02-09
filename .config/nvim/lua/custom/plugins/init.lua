@@ -25,35 +25,35 @@ return {
   {
     'goolord/alpha-nvim',
     config = function()
-      require('alpha').setup(require('alpha.themes.dashboard').config)
+      require('alpha').setup(require('alpha.themes.startify').config)
     end,
   },
-  {
-    'akinsho/bufferline.nvim',
-    version = '*',
-    dependencies = 'nvim-tree/nvim-web-devicons',
-    config = function()
-      require('bufferline').setup {
-        options = {
-          mode = 'buffers', -- or "tabs"
-          numbers = 'none',
-          diagnostics = 'nvim_lsp', -- Show LSP diagnostics
-          separator_style = 'slant', -- "slant", "padded_slant", "thin", "thick", etc.
-          show_buffer_close_icons = true,
-          show_close_icon = true,
-          always_show_bufferline = true,
-        },
-        highlights = {
-          fill = {
-            bg = 'none', -- Makes background transparent
-          },
-          background = {
-            bg = 'none', -- Also removes unwanted background
-          },
-        },
-      }
-    end,
-  },
+  -- {
+  --   'akinsho/bufferline.nvim',
+  --   version = '*',
+  --   dependencies = 'nvim-tree/nvim-web-devicons',
+  --   config = function()
+  --     require('bufferline').setup {
+  --       options = {
+  --         mode = 'buffers', -- or "tabs"
+  --         numbers = 'none',
+  --         diagnostics = 'nvim_lsp', -- Show LSP diagnostics
+  --         separator_style = 'slant', -- "slant", "padded_slant", "thin", "thick", etc.
+  --         show_buffer_close_icons = true,
+  --         show_close_icon = true,
+  --         always_show_bufferline = true,
+  --       },
+  --       highlights = {
+  --         fill = {
+  --           bg = 'none', -- Makes background transparent
+  --         },
+  --         background = {
+  --           bg = 'none', -- Also removes unwanted background
+  --         },
+  --       },
+  --     }
+  --   end,
+  -- },
   { 'catppuccin/nvim', name = 'catppuccin', priority = 1000 },
   {
     'nvim-lualine/lualine.nvim',
@@ -61,16 +61,6 @@ return {
   },
   {
     'rcarriga/nvim-notify',
-    config = function()
-      local notif = require 'notify'
-      vim.notify = function(msg, level, opts)
-        -- Suppress 'written' messages
-        if msg:match 'written' then
-          return
-        end
-        notif(msg, level, opts)
-      end
-    end,
   },
   -- lazy.nvim
   {
@@ -163,6 +153,33 @@ return {
         '<cmd>Trouble qflist toggle<cr>',
         desc = 'Quickfix List (Trouble)',
       },
+    },
+  },
+  {
+    -- amongst your other plugins
+    {
+      'akinsho/toggleterm.nvim',
+      version = '*',
+      config = function()
+        require('toggleterm').setup {
+          size = 20,
+          open_mapping = [[<leader>tt]],
+
+          hide_numbers = true, -- hide the number column in toggleterm buffers
+          shade_filetypes = {},
+          shade_terminals = true,
+          start_in_insert = true,
+          insert_mappings = true, -- whether or not the open mapping applies in insert mode
+          persist_size = true,
+          direction = 'float',
+          float_opts = {
+            border = 'curved',
+            winblend = 0,
+          },
+          close_on_exit = true, -- close the terminal window when the process exits
+          shell = vim.o.shell, -- change the default shell
+        }
+      end,
     },
   },
 }

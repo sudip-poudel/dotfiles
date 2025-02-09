@@ -42,6 +42,11 @@ vim.keymap.set('n', '<C-S>', ':w<CR>', { noremap = true, silent = true })
 vim.keymap.set('i', '<C-S>', '<Esc>:w<CR>', { noremap = true, silent = true })
 
 vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>', { desc = 'show function symbols' })
+
+-- Split panes
+vim.keymap.set('n', '<leader>v', ':vsplit<CR>', { noremap = true, silent = true }) -- Vertical split
+vim.keymap.set('n', '<leader>h', ':split<CR>', { noremap = true, silent = true }) -- Horizontal split
+vim.keymap.set('n', '<leader>x', ':close<CR>', { noremap = true, silent = true }) -- Close pane
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 

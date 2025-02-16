@@ -20,6 +20,22 @@ return {
           ['\\'] = 'close_window',
         },
       },
+      renderer = {
+        icons = {
+          show = {
+            folder = true, -- Show folder icons
+            file = true, -- Show file icons
+            folder_arrow = true, -- Show folder arrow icons
+          },
+          glyphs = {
+            folder = {
+              arrow_open = '', -- Open folder arrow icon
+              arrow_closed = '', -- Closed folder arrow icon
+            },
+            default = '', -- Default file type icon (e.g., for text files)
+          },
+        },
+      },
     },
   },
 }

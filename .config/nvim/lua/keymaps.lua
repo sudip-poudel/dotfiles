@@ -47,6 +47,11 @@ vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>', { desc = 'show functi
 vim.keymap.set('n', '<leader>v', ':vsplit<CR>', { noremap = true, silent = true }) -- Vertical split
 vim.keymap.set('n', '<leader>h', ':split<CR>', { noremap = true, silent = true }) -- Horizontal split
 vim.keymap.set('n', '<leader>x', ':close<CR>', { noremap = true, silent = true }) -- Close pane
+
+vim.keymap.set('n', '<leader>dn', function()
+  require('notify').dismiss { silent = true, pending = true }
+end, { desc = 'Dismiss all notifications' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 

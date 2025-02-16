@@ -2,6 +2,34 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
+--
+local handler = function(virtText, lnum, endLnum, width, truncate)
+  local newVirtText = {}
+  local suffix = (' 󰁂 %d '):format(endLnum - lnum)
+  local sufWidth = vim.fn.strdisplaywidth(suffix)
+  local targetWidth = width - sufWidth
+  local curWidth = 0
+  for _, chunk in ipairs(virtText) do
+    local chunkText = chunk[1]
+    local chunkWidth = vim.fn.strdisplaywidth(chunkText)
+    if targetWidth > curWidth + chunkWidth then
+      table.insert(newVirtText, chunk)
+    else
+      chunkText = truncate(chunkText, targetWidth - curWidth)
+      local hlGroup = chunk[2]
+      table.insert(newVirtText, { chunkText, hlGroup })
+      chunkWidth = vim.fn.strdisplaywidth(chunkText)
+      -- str width returned from truncate() may less than 2nd argument, need padding
+      if curWidth + chunkWidth < targetWidth then
+        suffix = suffix .. (' '):rep(targetWidth - curWidth - chunkWidth)
+      end
+      break
+    end
+    curWidth = curWidth + chunkWidth
+  end
+  table.insert(newVirtText, { suffix, 'MoreMsg' })
+  return newVirtText
+end
 return {
   {
     'stevearc/aerial.nvim',
@@ -58,6 +86,28 @@ return {
   {
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
+    globalstatus = true,
+    opts = {
+      options = {
+        component_separators = '',
+      },
+      sections = {
+        lualine_a = { 'mode' },
+        lualine_b = {
+          'branch',
+          'diff',
+        },
+        lualine_c = {
+          {
+            'diagnostics',
+            sources = { 'nvim_diagnostic' },
+          },
+        },
+        lualine_x = { { 'encoding', fmt = string.upper }, 'filetype' },
+        lualine_y = { 'progress', 'location' },
+        lualine_z = { { 'filename', path = 1 } },
+      },
+    },
   },
   {
     'rcarriga/nvim-notify',
@@ -163,7 +213,7 @@ return {
       config = function()
         require('toggleterm').setup {
           size = 20,
-          open_mapping = [[<leader>tt]],
+          open_mapping = [[<C>tt]],
 
           hide_numbers = true, -- hide the number column in toggleterm buffers
           shade_filetypes = {},
@@ -181,5 +231,46 @@ return {
         }
       end,
     },
+  },
+  {
+    'kevinhwang91/nvim-ufo',
+    dependencies = { 'kevinhwang91/promise-async' },
+
+    event = 'BufReadPost',
+    opts = {
+      filetype_exclude = { 'help', 'alpha', 'dashboard', 'neo-tree', 'Trouble', 'lazy', 'mason' },
+      fold_virt_text_handler = handler,
+      provider_selector = function()
+        return { 'lsp', 'indent' }
+      end,
+    },
+    config = function(_, opts)
+      vim.o.foldcolumn = '0' -- '0' is not bad
+      vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+      vim.o.foldlevelstart = 99
+      vim.o.foldenable = true
+      vim.o.fillchars = 'foldopen:▾,foldclose:▸,foldsep: ,fold: '
+      -- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+
+      local ufo = require 'ufo'
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('local_detach_ufo', { clear = true }),
+        pattern = opts.filetype_exclude,
+        callback = function()
+          ufo.detach()
+        end,
+      })
+      vim.keymap.set('n', 'zR', ufo.openAllFolds)
+      vim.keymap.set('n', 'zM', ufo.closeAllFolds)
+      vim.keymap.set('n', 'zr', ufo.openFoldsExceptKinds)
+      vim.keymap.set('n', 'zm', ufo.closeFoldsWith)
+      vim.keymap.set('n', 'zp', function()
+        local winid = ufo.peekFoldedLinesUnderCursor()
+        if not winid then
+          vim.lsp.buf.hover()
+        end
+      end)
+      ufo.setup(opts)
+    end,
   },
 }

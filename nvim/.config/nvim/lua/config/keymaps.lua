@@ -33,10 +33,7 @@ map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", {
 -- buffers
 map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
 map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
-map("n", "[b", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
-map("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 map("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
-map("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 map("n", "<leader>bd", "<cmd>bd<cr>", { desc = "Delete Buffer" })
 map("n", "<leader>wd", "<C-w>c", { desc = "Delete a Window" })
 map("n", "<leader>wo", "<C-w>o", { desc = "Delete other open Window" })
@@ -98,8 +95,8 @@ map("n", "<leader>xq", function()
 	end
 end, { desc = "Quickfix List" })
 
-map("n", "[q", vim.cmd.cprev, { desc = "Previous Quickfix" })
-map("n", "]q", vim.cmd.cnext, { desc = "Next Quickfix" })
+map("n", "[q", vim.cmd.cprev, { desc = "Previous Reference" })
+map("n", "]q", vim.cmd.cnext, { desc = "Next Reference" })
 
 -- diagnostic
 local diagnostic_goto = function(next, severity)
@@ -143,5 +140,9 @@ map("n", "sgd", ":vsplit | lua vim.lsp.buf.definition()<CR>", { noremap = true, 
 map("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true })
 map("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true })
 
+map("n", "clg", "oconsole.log()<esc>i")
+
 -- quit
 map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
+
+map("n", "<leader>wm", "<cmd> Maximize <cr>", { desc = "Format Document" })

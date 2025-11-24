@@ -158,49 +158,49 @@ return {
 					-- end, "Format Range")
 
 					-- Document highlight keymaps
-					map("n", "<leader>ch", function()
-						if vim.b.document_highlight_enabled then
-							vim.lsp.buf.clear_references()
-							vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
-							vim.b.document_highlight_enabled = false
-							print("Document highlight disabled")
-						else
-							if client and client.supports_method("textDocument/documentHighlight") then
-								vim.lsp.buf.document_highlight()
-								local group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
-								vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-									buffer = buffer,
-									group = group,
-									callback = vim.lsp.buf.document_highlight,
-								})
-								vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-									buffer = buffer,
-									group = group,
-									callback = vim.lsp.buf.clear_references,
-								})
-								vim.b.document_highlight_enabled = true
-								print("Document highlight enabled")
-							else
-								print("Document highlight not supported by this LSP server")
-							end
-						end
-					end, "Toggle Document Highlight")
+					-- map("n", "<leader>ch", function()
+					-- 	if vim.b.document_highlight_enabled then
+					-- 		vim.lsp.buf.clear_references()
+					-- 		vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+					-- 		vim.b.document_highlight_enabled = false
+					-- 		print("Document highlight disabled")
+					-- 	else
+					-- 		if client and client.supports_method("textDocument/documentHighlight") then
+					-- 			vim.lsp.buf.document_highlight()
+					-- 			local group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+					-- 			vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+					-- 				buffer = buffer,
+					-- 				group = group,
+					-- 				callback = vim.lsp.buf.document_highlight,
+					-- 			})
+					-- 			vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+					-- 				buffer = buffer,
+					-- 				group = group,
+					-- 				callback = vim.lsp.buf.clear_references,
+					-- 			})
+					-- 			vim.b.document_highlight_enabled = true
+					-- 			print("Document highlight enabled")
+					-- 		else
+					-- 			print("Document highlight not supported by this LSP server")
+					-- 		end
+					-- 	end
+					-- end, "Toggle Document Highlight")
 
 					-- Enable document highlight by default for certain filetypes
-					if client and client.supports_method("textDocument/documentHighlight") then
-						local group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
-						vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-							buffer = buffer,
-							group = group,
-							callback = vim.lsp.buf.document_highlight,
-						})
-						vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-							buffer = buffer,
-							group = group,
-							callback = vim.lsp.buf.clear_references,
-						})
-						vim.b.document_highlight_enabled = true
-					end
+					-- if client and client.supports_method("textDocument/documentHighlight") then
+					-- 	local group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+					-- 	vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+					-- 		buffer = buffer,
+					-- 		group = group,
+					-- 		callback = vim.lsp.buf.document_highlight,
+					-- 	})
+					-- 	vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+					-- 		buffer = buffer,
+					-- 		group = group,
+					-- 		callback = vim.lsp.buf.clear_references,
+					-- 	})
+					-- 	vim.b.document_highlight_enabled = true
+					-- end
 				end,
 			})
 
@@ -322,7 +322,55 @@ return {
 			end
 		end,
 	},
+	{
+		"RRethy/vim-illuminate",
+		event = { "BufReadPost", "BufNewFile" },
+		-- options passed to require("illuminate").configure
+		opts = {
+			providers = { "lsp", "treesitter", "regex" }, -- prefer LSP, then treesitter, then regex
+			delay = 200, -- ms before highlight appears
+			-- disable builtin Alt-n / Alt-p so we can use ]] / [[
+			-- (some plugin versions use `disable_keymaps`; safe to include)
+			disable_keymaps = true,
+			large_file_cutoff = 2000,
+			large_file_overrides = { providers = { "lsp" } },
+			filetypes_denylist = { "NvimTree", "TelescopePrompt", "packer", "lazy" },
+		},
+		config = function(_, opts)
+			local ok, illuminate = pcall(require, "illuminate")
+			if not ok then
+				return
+			end
 
+			illuminate.configure(opts)
+
+			-- helper to map goto_next/goto_prev on a buffer or globally
+			local function map_ref(key, dir, bufnr)
+				local fn = function()
+					-- false = no wrap, true = wrap when reaching end
+					illuminate["goto_" .. dir .. "_reference"](false)
+				end
+				vim.keymap.set("n", key, fn, {
+					desc = (dir == "next" and "Next reference" or "Prev reference"),
+					buffer = bufnr,
+					silent = true,
+					noremap = true,
+				})
+			end
+
+			-- global fallback mappings
+			map_ref("]]", "next", nil)
+			map_ref("[[", "prev", nil)
+
+			-- reapply buffer-local mappings after FileType to avoid ftplugin overrides
+			vim.api.nvim_create_autocmd("FileType", {
+				callback = function(args)
+					map_ref("]]", "next", args.buf)
+					map_ref("[[", "prev", args.buf)
+				end,
+			})
+		end,
+	},
 	-- cmdline tools and lsp servers
 	{
 		"williamboman/mason.nvim",

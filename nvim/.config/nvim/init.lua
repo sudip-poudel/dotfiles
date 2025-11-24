@@ -52,6 +52,15 @@ require("lazy").setup({
 -- Load configuration
 require("config.options")
 require("config.keymaps")
+require("nest_generator")
 require("config.autocmds")
 
+-- local function toggle_term()
+-- 	require("terminal").toggle()
+-- end
+-- vim.keymap.set({ "n", "t" }, "<C-/>", toggle_term, { desc = "Toggle bottom terminal", silent = true })
+--
+-- vim.keymap.set({ "n", "t" }, "<C-_>", toggle_term, { desc = "Toggle bottom terminal", silent = true })
+--
+-- vim.keymap.set("n", "<leader>tt", toggle_term, { desc = "Toggle bottom terminal" })
 -- vim.cmd.colorscheme("catppuccin")

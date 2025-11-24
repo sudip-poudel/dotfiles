@@ -167,6 +167,18 @@ return {
 		end,
 	},
 
+	{
+		"stevearc/oil.nvim",
+		---@module 'oil'
+		---@type oil.SetupOpts
+		opts = {},
+		-- Optional dependencies
+		dependencies = { { "nvim-mini/mini.icons", opts = {} } },
+		-- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if you prefer nvim-web-devicons
+		-- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
+		lazy = false,
+	},
+
 	-- Aerial - code outline window
 	{
 		"stevearc/aerial.nvim",
@@ -174,8 +186,9 @@ return {
 			{
 				"<leader>cs",
 				function()
-					require("aerial").tree_set_collapse_level(0, 1)
 					require("aerial").toggle()
+					local bufnr = vim.api.nvim_get_current_buf()
+					require("aerial").tree_set_collapse_level(bufnr, 1)
 				end,
 				desc = "Aerial (Symbols)",
 			},
@@ -246,6 +259,9 @@ return {
 					},
 				},
 				icons = icons,
+				manage_folds = false,
+				link_tree_to_folds = false,
+				link_folds_to_tree = false,
 				filter_kind = filter_kind,
 				-- filter_kind = {
 				-- 	"Class",
@@ -260,7 +276,7 @@ return {
 				-- },
 				-- optionally use on_attach to set keymaps when aerial has attached to a buffer
 				on_attach = function(bufnr)
-					require("aerial").tree_set_collapse_level(0, 1)
+					-- require("aerial").tree_set_collapse_level(0, 1)
 					-- Jump forwards/backwards with '{' and '}'
 					vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
 					vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
@@ -468,11 +484,6 @@ return {
 					{ "<leader>b", group = "buffer" },
 					{ "<leader>c", group = "code" },
 					{ "<leader>f", group = "file/find" },
-					{ "<leader>g", group = "git" },
-					{ "<leader>gh", group = "hunks" },
-					{ "<leader>q", group = "quit/session" },
-					{ "<leader>s", group = "search" },
-					{ "<leader>u", group = "ui" },
 					{ "<leader>x", group = "diagnostics/quickfix" },
 					{ "[", group = "prev" },
 					{ "]", group = "next" },
@@ -560,5 +571,24 @@ return {
 				map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "GitSigns Select Hunk")
 			end,
 		},
+	},
+
+	{
+		"declancm/maximize.nvim",
+		plugins = {
+			aerial = { enable = true }, -- enable aerial.nvim integration
+			tree = { enable = true }, -- enable nvim-tree.lua integration
+		},
+		event = "VeryLazy",
+		config = true,
+		-- keys = {
+		-- 	{
+		-- 		"<leader><wm>",
+		-- 		function()
+		-- 			require("maximize").toggle()
+		-- 		end,
+		-- 		desc = "Toggle Window Maximize",
+		-- 	},
+		-- },
 	},
 }

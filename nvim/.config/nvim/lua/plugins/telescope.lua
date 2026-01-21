@@ -13,6 +13,12 @@ return {
 					require("telescope").load_extension("fzf")
 				end,
 			},
+			{
+				"nvim-telescope/telescope-live-grep-args.nvim",
+				-- This will not install any breaking changes.
+				-- For major updates, this must be adjusted manually.
+				version = "^1.0.0",
+			},
 		},
 		keys = {
 			{
@@ -40,7 +46,13 @@ return {
 			{ "<leader>sC", "<cmd>Telescope commands<cr>", desc = "Commands" },
 			{ "<leader>sd", "<cmd>Telescope diagnostics bufnr=0<cr>", desc = "Document Diagnostics" },
 			{ "<leader>sD", "<cmd>Telescope diagnostics<cr>", desc = "Workspace Diagnostics" },
-			{ "<leader>sg", "<cmd>Telescope live_grep<cr>", desc = "Grep (Root Dir)" },
+			{
+				"<leader>sg",
+				function()
+					require("telescope").extensions.live_grep_args.live_grep_args()
+				end,
+				desc = "Grep (Root Dir)",
+			},
 			{ "<leader>sf", "<cmd>Telescope find_files<cr>", desc = "Find Files (Root Dir)" },
 			{ "<leader>sF", "<cmd>Telescope find_files hidden=true no_ignore=true<cr>", desc = "Find Files (cwd)" },
 			{ "<leader>sG", "<cmd>Telescope live_grep cwd=false<cr>", desc = "Grep (cwd)" },
@@ -64,6 +76,8 @@ return {
 		opts = function()
 			local actions = require("telescope.actions")
 
+			local lga_actions = require("telescope-live-grep-args.actions")
+
 			local open_with_trouble = function(...)
 				return require("trouble.sources.telescope").open(...)
 			end
@@ -85,6 +99,26 @@ return {
 			end
 
 			return {
+
+				extensions = {
+					live_grep_args = {
+						auto_quoting = true, -- enable/disable auto-quoting
+						-- define mappings, e.g.
+						mappings = { -- extend mappings
+							i = {
+								["<C-k>"] = lga_actions.quote_prompt(),
+								["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+								-- freeze the current list and start a fuzzy search in the frozen list
+								["<C-space>"] = lga_actions.to_fuzzy_refine,
+							},
+						},
+						-- ... also accepts theme settings, for example:
+						-- theme = "dropdown", -- use dropdown theme
+						-- theme = { }, -- use own theme spec
+						-- layout_config = { mirror=true }, -- mirror preview pane
+					},
+				},
+
 				defaults = {
 					prompt_prefix = " ",
 					selection_caret = " ",
@@ -118,6 +152,13 @@ return {
 					},
 				},
 			}
+		end,
+		config = function(_, opts)
+			local telescope = require("telescope")
+			telescope.setup(opts)
+
+			telescope.load_extension("fzf")
+			telescope.load_extension("live_grep_args")
 		end,
 	},
 }

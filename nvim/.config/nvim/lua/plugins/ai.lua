@@ -4,7 +4,7 @@ return {
 		"github/copilot.vim",
 		version = "v1.55.0",
 		event = "InsertEnter",
-		enabled = false,
+		enabled = true,
 		config = function()
 			-- Enable Copilot for specific filetypes
 			vim.g.copilot_filetypes = {
@@ -50,6 +50,7 @@ return {
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
 		branch = "canary",
+		enabled = false,
 		dependencies = {
 			{ "github/copilot.vim" }, -- or github/copilot.vim
 			{ "nvim-lua/plenary.nvim" }, -- for curl, log wrapper

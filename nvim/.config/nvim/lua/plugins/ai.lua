@@ -245,8 +245,69 @@ return {
 			-- })
 		end,
 	},
+	-- CodeCompanion
+	{
+		"olimorris/codecompanion.nvim",
+		event = "VeryLazy",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			"MunifTanjim/nui.nvim",
+			"zbirenbaum/copilot.lua",
+		},
+		opts = {
+			adapters = {
+				opencode = function()
+					return require("codecompanion.adapters").extend("openai", {
+						env = {
+							api_key = "OPENCODE_API_KEY",
+							base_url = "http://localhost:11434/v1",
+						},
+					})
+				end,
+			},
+			strategies = {
+				chat = { adapter = "copilot" },
+				inline = { adapter = "copilot" },
+			},
+		},
+		keys = {
+			{ "<leader>ac", "<cmd>CodeCompanionChat<cr>", desc = "CodeCompanion Chat" },
+			{ "<leader>aa", "<cmd>CodeCompanionActions<cr>", desc = "CodeCompanion Actions" },
+			{ "<leader>ai", ":CodeCompanion ", desc = "CodeCompanion Prompt" },
+			{ "<leader>aT", "<cmd>CodeCompanionToggleAdapter<cr>", desc = "CodeCompanion Toggle Adapter" },
+		},
+		config = function(_, opts)
+			local current_adapter = opts.strategies.chat.adapter or "copilot"
+			local function apply_adapter(name)
+				opts.strategies.chat.adapter = name
+				opts.strategies.inline.adapter = name
+				require("codecompanion").setup(opts)
+			end
+
+			apply_adapter(current_adapter)
+			vim.g.codecompanion_adapter = current_adapter
+
+			vim.api.nvim_create_user_command("CodeCompanionToggleAdapter", function()
+				current_adapter = current_adapter == "opencode" and "copilot" or "opencode"
+				vim.g.codecompanion_adapter = current_adapter
+				apply_adapter(current_adapter)
+				vim.notify("CodeCompanion adapter: " .. current_adapter, vim.log.levels.INFO)
+			end, {})
+		end,
+	},
+	-- Copilot.lua (used by CodeCompanion)
+	{
+		"zbirenbaum/copilot.lua",
+		event = "InsertEnter",
+		opts = {
+			panel = { enabled = false },
+			suggestion = { enabled = false },
+		},
+	},
 	{
 		"yetone/avante.nvim",
+		enabled = false,
 		-- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
 		-- ⚠️ must add this setting! ! !
 		build = vim.fn.has("win32") ~= 0

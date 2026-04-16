@@ -222,7 +222,7 @@ return {
 						callback = function(args)
 							local buffer = args.buf
 							local client = vim.lsp.get_client_by_id(args.data.client_id)
-							if client and client.supports_method("textDocument/inlayHint") then
+							if client and client:supports_method("textDocument/inlayHint") then
 								if
 									vim.api.nvim_buf_is_valid(buffer)
 									and vim.bo[buffer].buftype == ""
@@ -241,7 +241,7 @@ return {
 						callback = function(args)
 							local buffer = args.buf
 							local client = vim.lsp.get_client_by_id(args.data.client_id)
-							if client and client.supports_method("textDocument/codeLens") then
+							if client and client:supports_method("textDocument/codeLens") then
 								vim.lsp.codelens.refresh()
 								vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
 									buffer = buffer,

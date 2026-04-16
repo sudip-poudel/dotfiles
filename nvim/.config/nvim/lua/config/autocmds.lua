@@ -16,6 +16,17 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 	end,
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+	callback = function(args)
+		local ok = pcall(vim.treesitter.start, args.buf)
+		vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+		if not ok then
+			-- silently ignore if parser missing
+		end
+	end,
+})
+
 -- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = augroup("highlight_yank"),
